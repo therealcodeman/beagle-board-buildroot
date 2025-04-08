@@ -64,9 +64,15 @@ jobs:
         working-directory: ./buildroot-${{env.BUILDROOT_VERSION}}
         run: make
 
+      - name: List Output Directory
+        run: ls -l output/
+
+      - name: List Images Directory
+        run: ls -l output/images
+
       # List outputs
       - name: Upload Beagle Board Artifact
         uses: actions/upload-artifact@v4
         with:
           name: beagle-board-buildroot-${{ env.BUILDROOT_VERSION }}
-          path: ./output/images
+          path: output/images
