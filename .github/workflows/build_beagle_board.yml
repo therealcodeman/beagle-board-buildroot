@@ -15,11 +15,13 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    env:
-      BUILDROOT_VERSION: 2024.11
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        submodules: true
+
       - name: Update Runner
         run: sudo apt-get update && sudo apt-get upgrade -y --no-install-recommends
 
@@ -47,34 +49,25 @@ jobs:
           findutils \
           wget
 
-      # Download Artifact from buildroot.org
-      - name: Download Artifact from buildroot.org
-        run: wget https://gitlab.com/buildroot.org/buildroot/-/archive/${{env.BUILDROOT_VERSION}}/buildroot-${{env.BUILDROOT_VERSION}}.tar.gz
-
-      - name: Extract Artifact
-        run: tar -xvf buildroot-${{env.BUILDROOT_VERSION}}.tar.gz
-      
-      # Runs a single command using the runners shell
-      - name: Generate .config for Beagle Board
-        working-directory: ./buildroot-${{env.BUILDROOT_VERSION}}
-        run: make beaglebone_defconfig
+      - name: Copy .config into buildroot
+        run: cp .config buildroot/
 
       # Runs a set of commands using the runners shell
       - name: Compile .config for Beagle Board
-        working-directory: ./buildroot-${{env.BUILDROOT_VERSION}}
+        working-directory: buildroot
         run: make
 
       - name: List Output Directory
-        working-directory: ./buildroot-${{env.BUILDROOT_VERSION}}
+        working-directory: buildroot
         run: ls -l output/
 
       - name: List Images Directory
-        working-directory: ./buildroot-${{env.BUILDROOT_VERSION}}
+        working-directory: buildroot
         run: ls -l output/images
 
       # List outputs
       - name: Upload Beagle Board Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: beagle-board-buildroot-${{ env.BUILDROOT_VERSION }}
-          path: ./buildroot-${{env.BUILDROOT_VERSION}}/output/images
+          name: beagle-board-buildroot-2023.02.11-modified
+          path: ./buildroot/output/images
